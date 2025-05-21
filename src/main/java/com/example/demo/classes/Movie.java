@@ -17,13 +17,25 @@ public class Movie {
     public String name;
     public int rating;
     public String description;
+    @Column(name = "image-link")
+    public String imagelink;
 
-    public Movie(Long id, String name, int rating, String description) {
+    public Movie(Long id, String name, int rating, String description,String imagelink) {
         this.id = id;
         this.name = name;
         this.rating = rating;
         this.description = description;
+        this.imagelink = imagelink;
     }
+
+    public String getImagelink() {
+        return imagelink;
+    }
+
+    public void setImagelink(String imagelink) {
+        this.imagelink = imagelink;
+    }
+
     public Movie(){}
     public Long getId() {
         return id;

@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.classes.Movie;
 import com.example.demo.repositories.MovieRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,25 +17,51 @@ public class FilmController {
         this.repo = repo;
     }
 
-    @CrossOrigin
     @GetMapping("/getAllMovies")
     public List<Movie> getAllMovies(){
         return repo.findAll();
     }
     @PostMapping("/addNewMovie")
-    @CrossOrigin
-    public void addNewMovie(@RequestBody Movie movie) {
-        repo.save(movie);
+    public ResponseEntity<?> addNewMovie(@RequestBody Movie movie) {
+        if (repo.existsByName(movie.getName())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already exists");
+        }
+        else{
+            repo.save(movie);
+            return ResponseEntity.ok("Succesfully");
+        }
     }
     @GetMapping("/getMovieData")
-    @CrossOrigin
-    public ResponseEntity<Movie> getMovieData(@RequestParam Long id){
-        Movie currmovie = repo.getMovieById(id);
-        return ResponseEntity.ok(currmovie);
+    public ResponseEntity<?> getMovieData(@RequestParam Long id){
+        if (repo.existsById(id)){
+            Movie currmovie = repo.getMovieById(id);
+            return ResponseEntity.ok(currmovie);
+        }
+        else{
+            return ResponseEntity.badRequest().body("Not found");
+        }
     }
     @GetMapping("/findMovies")
-    @CrossOrigin
-    public ResponseEntity<List<Movie>> findMovies(@RequestParam String name){
-        return ResponseEntity.ok(repo.findAllByNameContains(name));
+    public ResponseEntity<?> findMovies(@RequestParam String name){
+        if (repo.existsByNameContains(name)){
+            return ResponseEntity.ok(repo.findAllByNameContains(name));
+        }
+        else{
+            return ResponseEntity.badRequest().body("Not found");
+        }
+    }
+    @DeleteMapping("/deleteMovie")
+    public ResponseEntity<String> deleteMovie(@RequestParam Long id){
+        try{
+            if (repo.existsById(id)){
+                repo.deleteById(id);
+                return ResponseEntity.ok("Successfully deleted:"+id);
+            }
+            else{
+                return ResponseEntity.badRequest().body("Movie not found");
+            }
+        } catch (Exception ex){
+            throw ex;
+        }
     }
 }

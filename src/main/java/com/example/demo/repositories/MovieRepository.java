@@ -13,4 +13,8 @@ public interface MovieRepository extends JpaRepository<Movie,Long> {
     List<Movie> findAllByNameContains(String name);
 
     Movie getMovieById(Long id);
+
+    boolean existsByNameContains(String name);
+
+    boolean existsByName(String name);
 }
