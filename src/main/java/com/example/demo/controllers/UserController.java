@@ -25,21 +25,23 @@ public class UserController {
     public UserController(UserRepository repo) {
         this.repo = repo;
     }
+
+    @Autowired
+    private JwtUtil jwt;
+
     @CrossOrigin
     @PostMapping("/registrationUser")
-    public ResponseEntity<String> RegistrationUser(@RequestBody User user) throws Exception{
+    public ResponseEntity<?> RegistrationUser(@RequestBody User user) throws Exception{
         if (repo.existsUserByUsername(user.getUsername())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already exist");
         }
         else{
             user.setPassword(bp.encode(user.getPassword()));
             repo.save(user);
-            return ResponseEntity.status(HttpStatus.OK).body("Successfully registered");
+            String token = jwt.generateToken(user.getUsername());
+            return ResponseEntity.ok(Collections.singletonMap("token",token));
         }
     }
-    @Autowired
-    private JwtUtil jwt;
-
     @PostMapping("/loginUser")
     @CrossOrigin
     public ResponseEntity<?> loginUser(@RequestBody LoginUser user) {
@@ -58,7 +60,7 @@ public class UserController {
     @GetMapping("/getUserData")
     public ResponseEntity<User> getUsersData() throws Exception{
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = (User) repo.findUserByUsername(username);
+        User user = repo.findUserByUsername(username);
         user.setPassword("");
         return ResponseEntity.ok(user);
     }
